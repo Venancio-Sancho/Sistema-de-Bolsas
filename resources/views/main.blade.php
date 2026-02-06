@@ -1,0 +1,3 @@
+@include('base.header')
+
+@include('base.footer')
