@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\Scholarship;
+use App\Services\NotificationService;
+use Illuminate\Http\Request;
 
 class ScholarshipController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     public function index()
     {
         $scholarships = Scholarship::all();
@@ -25,7 +31,14 @@ class ScholarshipController extends Controller
             'status' => 'required|in:Disponível,Indisponível',
         ]);
 
-        Scholarship::create($request->all());
+        $scholarship = Scholarship::create($request->all());
+
+        if ($scholarship->status === 'Disponível') {
+            $this->notificationService->notifyStudents(
+                'Nova bolsa disponível',
+                "A bolsa \"{$scholarship->name}\" está disponível para candidatura até {$scholarship->end_date->format('d/m/Y')}."
+            );
+        }
 
         return redirect()->back()->with('success', 'Bolsa criada com sucesso!');
     }
@@ -43,7 +56,16 @@ class ScholarshipController extends Controller
         ]);
 
         $scholarship = Scholarship::findOrFail($id);
+        $wasAvailable = $scholarship->status === 'Disponível';
+
         $scholarship->update($request->all());
+
+        if ($scholarship->status === 'Disponível' && ! $wasAvailable) {
+            $this->notificationService->notifyStudents(
+                'Bolsa disponível novamente',
+                "A bolsa \"{$scholarship->name}\" está agora disponível para candidatura até {$scholarship->end_date->format('d/m/Y')}."
+            );
+        }
 
         return redirect()->back()->with('success', 'Bolsa atualizada com sucesso!');
     }

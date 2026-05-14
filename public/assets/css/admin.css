@@ -1,0 +1,30 @@
+
+    /* ... (Mantenha o estilo anterior, ele já está ótimo) ... */
+    .custom-blue-border {
+        border: 2px solid #e7efff !important;
+        border-bottom: 4px solid #0d6efd !important;
+        transition: all 0.3s ease;
+    }
+
+    .action-card {
+        background-color: #fff;
+        border-radius: 12px;
+    }
+
+    .action-card:hover {
+        transform: translateY(-8px);
+        border-color: #0d6efd !important;
+        box-shadow: 0 10px 20px rgba(13, 110, 253, 0.15) !important;
+    }
+
+    .icon-wrapper {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-card:hover .fa {
+        transform: scale(1.1);
+        transition: transform 0.2s ease;
+    }

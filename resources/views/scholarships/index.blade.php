@@ -15,13 +15,13 @@
                         <li class="breadcrumb-item active">Bolsas</li>
                     </ul>
                 </div>
-               
+                @can('excluir')
                 <div class="col-auto text-end float-end ms-auto">
                     <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScholarship">
                         <i class="fas fa-plus"></i> Adicionar Bolsa
                     </a>
                 </div>
-             
+             @endcan
             </div>
         </div>
 
@@ -78,7 +78,7 @@
                                             <button class="btn btn-danger btn-sm"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#deleteScholarship{{ $scholarship->id }}">
-                                                Apagar
+                                             Eliminar
                                             </button>
                                         </td>
                                         @endcan
@@ -186,17 +186,17 @@
                                             @csrf @method('DELETE')
 
                                             <div class="modal-header">
-                                              <h5 class="modal-title">Apagar Bolsa</h5>
+                                              <h5 class="modal-title">Eliminar Bolsa</h5>
                                               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
 
                                             <div class="modal-body">
-                                              Tem certeza que deseja apagar:
+                                              Tem certeza que deseja Eliminar:
                                               <strong>{{ $scholarship->name }}</strong>?
                                             </div>
 
                                             <div class="modal-footer">
-                                              <button type="submit" class="btn btn-danger">Apagar</button>
+                                              <button type="submit" class="btn btn-danger">Eliminar</button>
                                               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                             </div>
 

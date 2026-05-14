@@ -36,4 +36,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Course::class, 'id_course');
     }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'id_user', 'id');
+    }
+
+    // Notificações do utilizador
+public function notifications()
+{
+    return $this->hasMany(Notification::class);
+}
 }

@@ -34,7 +34,7 @@
                 <td>{{ $course->description }}</td>
                 <td>
                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editCourseModal{{ $course->id_course}}">Editar</button>
-                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCourseModal{{ $course->id_course}}">Deletar</button>
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCourseModal{{ $course->id_course}}">Eliminar</button>
                 </td>
             </tr>
 

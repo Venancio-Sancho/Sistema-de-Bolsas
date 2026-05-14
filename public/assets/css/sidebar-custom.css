@@ -1,0 +1,96 @@
+:root {
+    --sidebar-bg: #0f172a;
+    --sidebar-bg-2: #111827;
+    --sidebar-accent: #22d3ee;
+    --sidebar-text: #e2e8f0;
+    --sidebar-muted: #94a3b8;
+    --sidebar-hover: rgba(34, 211, 238, 0.12);
+    --sidebar-border: rgba(148, 163, 184, 0.16);
+}
+
+.leftside-menu {
+    background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--sidebar-bg-2) 100%);
+    box-shadow: 0 20px 40px rgba(2, 6, 23, 0.45);
+    border-right: 1px solid var(--sidebar-border);
+}
+
+.leftside-menu .logo-light p {
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.leftside-menu #leftside-menu-container {
+    padding: 10px 10px 20px;
+}
+
+.side-nav {
+    padding: 8px 6px;
+    gap: 6px;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-nav .side-nav-link {
+    color: var(--sidebar-text);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.side-nav .side-nav-link i {
+    font-size: 18px;
+    color: var(--sidebar-muted);
+    transition: color 0.2s ease;
+}
+
+.side-nav .side-nav-link:hover,
+.side-nav .side-nav-link:focus {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+    transform: translateX(2px);
+    border-color: rgba(34, 211, 238, 0.18);
+}
+
+.side-nav .side-nav-link:hover i,
+.side-nav .side-nav-link:focus i {
+    color: var(--sidebar-accent);
+}
+
+.side-nav .side-nav-second-level {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.35);
+    border: 1px solid var(--sidebar-border);
+}
+
+.side-nav .side-nav-second-level a {
+    color: var(--sidebar-text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.side-nav .side-nav-second-level a i {
+    color: var(--sidebar-muted);
+}
+
+.side-nav .side-nav-second-level a:hover,
+.side-nav .side-nav-second-level a:focus {
+    background: rgba(34, 211, 238, 0.12);
+    color: var(--sidebar-text);
+}
+
+.side-nav .badge.bg-success {
+    background: var(--sidebar-accent) !important;
+    color: #0b1120;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(34, 211, 238, 0.25);
+}

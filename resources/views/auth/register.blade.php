@@ -4,187 +4,417 @@
     <meta charset="utf-8" />
     <title>Registar | Universidade Save</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Sistema de Gestão de Bolsas" name="description" />
-    <meta content="Universidade Save" name="author" />
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
-
-    <!-- App css -->
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" id="light-style" />
-    <link href="{{ asset('assets/css/app-dark.min.css') }}" rel="stylesheet" type="text/css" id="dark-style" />
+    <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
+    
+    <link href="{{ asset('assets/css/register.css') }}" rel="stylesheet" type="text/css" />
 </head>
 
-<body class="loading authentication-bg">
+<body>
 
-<div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-xxl-5 col-lg-6">
-                <div class="card shadow-lg">
-                    <div class="card-header pt-4 pb-4 text-center bg-primary">
-                        <a href="{{ route('register') }}">
-                            <span><img src="{{ asset('assets/images/logo.png') }}" alt="Logo" height="22"></span>
-                        </a>
-                    </div>
+    <div class="register-card">
 
-                    <div class="card-body p-4">
+        <!-- HEADER -->
+        <div class="header-section">
 
-                        <!-- Título e descrição -->
-                        <div class="text-center w-75 m-auto mb-3">
-                            <h4 class="text-dark-50 fw-bold">Criar Conta</h4>
-                            <p class="text-muted mb-3">Preencha o formulário abaixo para se registar.</p>
-                        </div>
+            <h4>Registar-se</h4>
 
-                        <!-- Erros -->
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+            <p class="instruction-text">
+                Preencha os seus dados para aceder ao SIBOLSAVE
+            </p>
 
-                        <!-- Formulário -->
-                        <form action="{{ route('register.store') }}" method="POST">
-                            @csrf
-
-                            <!-- Nome -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-user"></i></span>
-                                <input type="text" name="name" class="form-control" placeholder="Nome completo" required>
-                            </div>
-
-                            <!-- Email -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-envelope-alt"></i></span>
-                                <input type="email" name="email" class="form-control" placeholder="Email" required>
-                            </div>
-
-                            <!-- Senha e Confirmar -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3 input-group">
-                                    <span class="input-group-text"><i class="uil uil-lock-alt"></i></span>
-                                    <input type="password" name="password" class="form-control" placeholder="Senha" required>
-                                </div>
-                                <div class="col-md-6 mb-3 input-group">
-                                    <span class="input-group-text"><i class="uil uil-lock-alt"></i></span>
-                                    <input type="password" name="password_confirmation" class="form-control" placeholder="Confirmar Senha" required>
-                                </div>
-                            </div>
-
-                            <!-- Data de Nascimento e Gênero -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3 input-group">
-                                    <span class="input-group-text"><i class="uil uil-calendar-alt"></i></span>
-                                    <input type="date" name="birth_date" class="form-control" placeholder="Data de nascimento">
-                                </div>
-                                <div class="col-md-6 mb-3 input-group">
-                                    <span class="input-group-text"><i class="uil uil-venus-mars"></i></span>
-                                    <select name="gender" class="form-control">
-                                        <option value="">-- Selecionar Gênero --</option>
-                                        <option value="Masculino">Masculino</option>
-                                        <option value="Feminino">Feminino</option>
-                                        <option value="Outro">Outro</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Telefone -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-phone"></i></span>
-                                <input type="text" name="phone" class="form-control" placeholder="Telefone">
-                            </div>
-
-                            <!-- Endereço -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-location-point"></i></span>
-                                <input type="text" name="address" class="form-control" placeholder="Endereço">
-                            </div>
-
-                            <!-- Curso -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-book-alt"></i></span>
-                                <select name="course" id="course" class="form-control" required>
-                                    <option value="">-- Selecionar Curso --</option>
-                                    @foreach($courses as $course)
-                                        <option value="{{ $course->id_course }}"
-                                            data-faculty="{{ $course->faculty->faculty_name ?? '' }}"
-                                            data-department="{{ $course->department->department_name ?? '' }}">
-                                            {{ $course->course_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Faculdade -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-building"></i></span>
-                                <input type="text" id="faculty" class="form-control" placeholder="Faculdade" readonly>
-                            </div>
-
-                            <!-- Departamento -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-sitemap"></i></span>
-                                <input type="text" id="department" class="form-control" placeholder="Departamento" readonly>
-                            </div>
-
-                            <!-- Nível -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-graduation-cap"></i></span>
-                                <select name="level" class="form-control" required>
-                                    <option value="">-- Selecionar Nível --</option>
-                                    <option value="1">1º Ano</option>
-                                    <option value="2">2º Ano</option>
-                                    <option value="3">3º Ano</option>
-                                    <option value="4">4º Ano</option>
-                                </select>
-                            </div>
-
-                            <!-- Período -->
-                            <div class="mb-3 input-group">
-                                <span class="input-group-text"><i class="uil uil-clock"></i></span>
-                                <select name="period" class="form-control" required>
-                                    <option value="">-- Selecionar Período --</option>
-                                    <option value="Semilaboral">laboral</option>
-                                </select>
-                            </div>
-
-                            <div class="d-grid text-center mb-3">
-                                <button class="btn btn-primary" type="submit">Registar</button>
-                            </div>
-                        </form>
-
-                        <!-- Link de login dentro do card -->
-                        <div class="mt-2 text-center">
-                            <p class="text-muted mb-1">Já tem uma conta?</p>
-                            <a href="{{ route('login') }}" class="btn btn-outline-primary fw-bold">Entrar</a>
-                        </div>
-
-                        <!-- Rodapé dentro do card -->
-                        <div class="mt-3 text-center text-muted">
-                            2025 © Universidade Save
-                        </div>
-
-                    </div>
-                </div>
-            </div>
         </div>
+
+        <!-- FORM -->
+        <div class="form-container">
+
+            <!-- ERROS -->
+            @if ($errors->any())
+
+                <div class="alert alert-danger mb-4">
+
+                    <ul class="mb-0">
+
+                        @foreach ($errors->all() as $error)
+
+                            <li>{{ $error }}</li>
+
+                        @endforeach
+
+                    </ul>
+
+                </div>
+
+            @endif
+
+            <form action="{{ route('register.store') }}" method="POST">
+
+                @csrf
+
+                <div class="row">
+
+                    <!-- NOME -->
+                    <div class="col-md-12">
+
+                        <label class="form-label">
+                            Nome Completo
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-user input-icon"></i>
+
+                            <input type="text"
+                                name="name"
+                                class="form-control"
+                                placeholder="Digite o seu nome completo"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Email
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-envelope-alt input-icon"></i>
+
+                            <input type="email"
+                                name="email"
+                                class="form-control"
+                                placeholder="exemplo@save.ac.mz"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <!-- TELEFONE -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Telefone
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-phone input-icon"></i>
+
+                            <input type="text"
+                                name="phone"
+                                class="form-control"
+                                placeholder="+258..."
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <!-- SENHA -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Senha
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-lock-alt input-icon"></i>
+
+                            <input type="password"
+                                name="password"
+                                class="form-control"
+                                placeholder="Digite sua senha"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CONFIRMAR -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Confirmar Senha
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-check-circle input-icon"></i>
+
+                            <input type="password"
+                                name="password_confirmation"
+                                class="form-control"
+                                placeholder="Confirme a senha"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <!-- NASCIMENTO -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Data de Nascimento
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-calendar-alt input-icon"></i>
+
+                            <input type="date"
+                                name="birth_date"
+                                class="form-control">
+
+                        </div>
+
+                    </div>
+
+                    <!-- GENERO -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Género
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-venus-mars input-icon"></i>
+
+                            <select name="gender"
+                                class="form-control">
+
+                                <option value="">
+                                    Selecionar género
+                                </option>
+
+                                <option value="Masculino">
+                                    Masculino
+                                </option>
+
+                                <option value="Feminino">
+                                    Feminino
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CURSO -->
+                    <div class="col-md-12">
+
+                        <label class="form-label">
+                            Curso de Ingresso
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-book-alt input-icon"></i>
+
+                            <select name="course"
+                                id="course"
+                                class="form-control"
+                                required>
+
+                                <option value="">
+                                    -- Selecione o seu curso --
+                                </option>
+
+                                @foreach($courses as $course)
+
+                                    <option value="{{ $course->id_course }}"
+                                        data-faculty="{{ $course->faculty->faculty_name ?? '' }}"
+                                        data-department="{{ $course->department->department_name ?? '' }}">
+
+                                        {{ $course->course_name }}
+
+                                    </option>
+
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- FACULDADE -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Faculdade
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-building input-icon"></i>
+
+                            <input type="text"
+                                id="faculty"
+                                class="form-control"
+                                placeholder="Faculdade"
+                                readonly>
+
+                        </div>
+
+                    </div>
+
+                    <!-- DEPARTAMENTO -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Departamento
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-sitemap input-icon"></i>
+
+                            <input type="text"
+                                id="department"
+                                class="form-control"
+                                placeholder="Departamento"
+                                readonly>
+
+                        </div>
+
+                    </div>
+
+                    <!-- NIVEL -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Nível / Ano
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-graduation-cap input-icon"></i>
+
+                            <select name="level"
+                                class="form-control"
+                                required>
+
+                                <option value="">
+                                    Selecionar Ano
+                                </option>
+
+                                <option value="1">
+                                    1º Ano
+                                </option>
+
+                                <option value="2">
+                                    2º Ano
+                                </option>
+
+                                <option value="3">
+                                    3º Ano
+                                </option>
+
+                                <option value="4">
+                                    4º Ano
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- REGIME -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Regime
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="uil uil-clock input-icon"></i>
+
+                            <select name="period"
+                                class="form-control"
+                                required>
+
+                                <option value="">
+                                    Selecionar período
+                                </option>
+
+                                <option value="laboral">
+                                    Laboral
+                                </option>
+
+                                <option value="Pos-Laboral">
+                                    Pós-Laboral
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- BOTÃO -->
+                <button type="submit" class="btn-registar">
+
+                    Registar
+                    <i class="uil uil-arrow-right"></i>
+
+                </button>
+
+                <!-- LOGIN -->
+                <div class="login-footer">
+
+                    Já tem uma conta?
+
+                    <a href="{{ route('login') }}">
+                        Fazer Login
+                    </a>
+
+                </div>
+
+            </form>
+
+            <!-- COPYRIGHT -->
+            <div class="copyright">
+
+                © 2026 • Universidade Save
+
+            </div>
+
+        </div>
+
     </div>
-</div>
 
-<!-- Scripts -->
-<script src="{{ asset('assets/js/vendor.min.js') }}"></script>
-<script src="{{ asset('assets/js/app.min.js') }}"></script>
+    <!-- JS -->
+    <script src="{{ asset('assets/js/vendor.min.js') }}"></script>
 
-<script>
-    // Atualiza automaticamente faculdade e departamento ao escolher o curso
-    document.getElementById('course').addEventListener('change', function() {
-        let selected = this.options[this.selectedIndex];
-        document.getElementById('faculty').value = selected.getAttribute('data-faculty') || '';
-        document.getElementById('department').value = selected.getAttribute('data-department') || '';
-    });
-</script>
+    <script>
+        document.getElementById('course').addEventListener('change', function() {
+
+            let selected = this.options[this.selectedIndex];
+
+            document.getElementById('faculty').value =
+                selected.getAttribute('data-faculty') || '';
+
+            document.getElementById('department').value =
+                selected.getAttribute('data-department') || '';
+
+        });
+    </script>
+
 </body>
 </html>

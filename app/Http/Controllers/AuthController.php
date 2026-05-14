@@ -71,16 +71,34 @@ class AuthController extends Controller
     /**
      * Efetuar login
      */
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|string',
-        ]);
+ 
+public function login(Request $request)
+{
+    $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required|string',
+    ]);
 
-        $user = User::where('email', $request->email)->first();
+    $email = $request->email;
+    $password = $request->password;
 
-        if ($user && Hash::check($request->password, $user->password)) {
+    $user = User::where('email', $email)->first();
+
+    // ❌ Email não existe
+    if (!$user) {
+        return back()->withErrors([
+            'email' => 'O email está errado.'
+        ])->withInput();
+    }
+
+    // ❌ Senha errada
+    if (!Hash::check($password, $user->password)) {
+        return back()->withErrors([
+            'password' => 'A senha está errada.'
+        ])->withInput();
+    }
+
+    // ✅ Login correto
     Auth::login($user);
 
     if ($user->role === 'admin') {
@@ -89,10 +107,7 @@ class AuthController extends Controller
 
     return redirect()->route('student.index');
 }
-
-
-        return back()->withErrors(['email' => 'Invalid email or password.']);
-    }
+   
 
     /**
      * Efetuar logout

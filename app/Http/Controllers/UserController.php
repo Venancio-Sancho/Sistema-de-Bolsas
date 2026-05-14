@@ -37,7 +37,7 @@ class UserController extends Controller
             'address'     => 'nullable|string|max:255',
              'course' => 'required|exists:courses,id_course',
             'level'       => 'required|integer|between:1,4',
-            'period' => 'required|in:Semilaboral,Pos-laboral', // validação do período
+            'period' => 'required|in:laboral,Pos-laboral', // validação do período
         ]);
 
         User::create([

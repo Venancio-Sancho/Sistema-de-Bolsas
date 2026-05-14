@@ -1,0 +1,109 @@
+
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+        --accent-color: #0d6efd;
+    }
+
+    body { 
+        font-family: 'Plus Jakarta Sans', sans-serif; 
+        background-color: #f4f7fe; 
+    }
+
+    .student-dashboard {
+        width: 100%;
+    }
+
+    .student-dashboard .row.g-4 {
+        align-items: flex-start;
+    }
+
+    .premium-card {
+        background: var(--glass-bg);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 24px;
+        backdrop-filter: blur(10px);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .status-banner {
+        background: var(--primary-gradient);
+        border-radius: 24px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        min-height: 230px;
+    }
+
+    .status-banner::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .info-box {
+        background: #f8faff;
+        border-radius: 18px;
+        padding: 20px;
+        border: 1px solid #edf2f7;
+    }
+
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        background: white;
+        color: var(--accent-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        box-shadow: 0 8px 15px rgba(13, 110, 253, 0.1);
+    }
+
+    .quick-action {
+        text-decoration: none;
+        display: block;
+        padding: 20px;
+        border-radius: 20px;
+        background: white;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+        min-height: 96px;
+    }
+
+    .quick-action:hover {
+        border-color: var(--accent-color);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #a0aec0;
+    }
+
+    .services-col .quick-action {
+        display: flex;
+        align-items: center;
+        min-height: 90px;
+    }
+
+    .services-col .quick-action .d-flex {
+        width: 100%;
+    }
+
+    .services-col .mb-4 {
+        margin-bottom: 18px !important;
+    }
+
+    .support-card {
+        border-radius: 20px;
+    }

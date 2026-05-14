@@ -56,22 +56,22 @@
                         <div class="collapse" id="sidebarDashboards">
                             <ul class="side-nav-second-level">
 
-                                 @can('excluir')
-                                <li>
-                                     <a href="{{ route('admin.index') }}">
+                                @can('excluir')
+                                    <li>
+                                        <a href="{{ route('admin.index') }}">
                                             <i class="uil-home"></i> Inicio
                                         </a>
                                     </li>
-                               @endcan
+                                @endcan
 
-                                     @can('exclu')
-                                      <li>
+                                @can('exclu')
+                                    <li>
                                         <a href="{{ route('student.index') }}">
                                             <i class="uil-home"></i> Inicio
                                         </a>
                                     </li>
-                                  @endcan
-                                  
+                                @endcan
+
                                 @can('excluir')
                                     <li>
                                         <a href="{{ route('faculties.index') }}">
@@ -107,13 +107,38 @@
                                         <span>Bolsas</span>
                                     </a>
                                 </li>
+                                @can('excluir')
+                                    @can('exclu')
+                                        <li>
+                                            <a href="{{ route('notifications.index') }}">
+                                                <i class="uil uil-gift"></i>
+                                                <span>Notificações</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                @endcan
 
+                                <li>
+                                    <a href="{{ route('messages.index') }}">
+                                        <i class="uil uil-message"></i>
+                                        <span>Mensagens</span>
+                                    </a>
+                                </li>
                                 <li>
                                     <a href="{{ route('applications.index') }}">
                                         <i class="uil uil-file-alt"></i>
                                         <span>Candidaturas</span>
                                     </a>
                                 </li>
+
+                                @can('excluir')
+                                    <li>
+                                        <a href="{{ route('reports.index') }}">
+                                            <i class="uil uil-analytics"></i>
+                                            <span>Relatório</span>
+                                        </a>
+                                    </li>
+                                @endcan
 
 
                             </ul>
@@ -165,23 +190,45 @@
                             <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#"
                                 role="button" aria-haspopup="false" aria-expanded="false">
                                 <i class="dripicons-bell noti-icon"></i>
-                                <span class="noti-icon-badge"></span>
+                                @if ($unreadNotificationsCount > 0)
+                                    <span class="noti-icon-badge"></span>
+                                @endif
                             </a>
                             <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
 
                                 <div class="dropdown-item noti-title">
                                     <h5 class="m-0">
                                         <span class="float-end">
-                                            <a href="javascript: void(0);" class="text-dark">
-                                                <small>Limpar</small>
-                                            </a>
+                                            <small class="text-dark">{{ $unreadNotificationsCount }} nova(s)</small>
                                         </span>Notificações
                                     </h5>
                                 </div>
 
-                                <a href="javascript:void(0);"
+                                @forelse($headerNotifications as $notification)
+                                    <a href="{{ route('notifications.read', $notification->id) }}"
+                                        class="dropdown-item notify-item {{ $notification->is_read ? '' : 'active' }}">
+                                        <div class="notify-icon bg-primary">
+                                            <i class="mdi mdi-bell-outline"></i>
+                                        </div>
+                                        <p class="notify-details mb-1">
+                                            {{ $notification->title }}
+                                            <small class="text-muted d-block">
+                                                {{ \Illuminate\Support\Str::limit($notification->message, 60) }}
+                                            </small>
+                                            <small class="text-muted">
+                                                {{ $notification->created_at->diffForHumans() }}
+                                            </small>
+                                        </p>
+                                    </a>
+                                @empty
+                                    <div class="dropdown-item text-muted">
+                                        Nenhuma notificação encontrada.
+                                    </div>
+                                @endforelse
+
+                                <a href="{{ route('notifications.index') }}"
                                     class="dropdown-item text-center text-primary notify-item notify-all">
-                                    Ver Todas
+                                    Ver todas
                                 </a>
 
                             </div>
@@ -191,8 +238,47 @@
                             <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#"
                                 role="button" aria-haspopup="false" aria-expanded="false">
                                 <i class="dripicons-mail noti-icon"></i>
-                                <span class="badge bg-danger rounded-pill">3</span>
+                                @if ($unreadMessagesCount > 0)
+                                    <span class="badge bg-danger rounded-pill">{{ $unreadMessagesCount }}</span>
+                                @endif
                             </a>
+                            <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
+
+                                <div class="dropdown-item noti-title">
+                                    <h5 class="m-0">
+                                        <span class="float-end">
+                                            <small class="text-dark">{{ $unreadMessagesCount }} nova(s)</small>
+                                        </span>Mensagens
+                                    </h5>
+                                </div>
+
+                                @forelse($headerMessages as $message)
+                                    <a href="{{ route('messages.chat', $message->sender_id === Auth::id() ? $message->receiver_id : $message->sender_id) }}"
+                                        class="dropdown-item notify-item {{ $message->is_read ? '' : 'active' }}">
+                                        <div class="notify-icon bg-info">
+                                            <i class="mdi mdi-message-text-outline"></i>
+                                        </div>
+                                        <p class="notify-details mb-1">
+                                            {{ optional($message->sender)->name ?? 'Utilizador' }}
+                                            <small class="text-muted d-block">
+                                                {{ \Illuminate\Support\Str::limit($message->message, 60) }}
+                                            </small>
+                                            <small class="text-muted">
+                                                {{ $message->created_at->diffForHumans() }}
+                                            </small>
+                                        </p>
+                                    </a>
+                                @empty
+                                    <div class="dropdown-item text-muted">
+                                        Nenhuma mensagem encontrada.
+                                    </div>
+                                @endforelse
+
+                                <a href="{{ route('messages.index') }}"
+                                    class="dropdown-item text-center text-primary notify-item notify-all">
+                                    Abrir mensagens
+                                </a>
+                            </div>
                         </li>
 
                         <li class="notification-list">

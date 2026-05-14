@@ -2,45 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Scholarship;
+use App\Services\NotificationService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ApplicationController extends Controller
 {
-    public function __construct()
+    public function __construct(private NotificationService $notificationService)
     {
         $this->middleware('auth');
     }
 
     public function index()
     {
-        // Buscar todas bolsas (para o modal Add + Edit)
         $scholarships = Scholarship::all();
 
-        // Se for administrador (access_level = 1)
-        if (auth()->user()->access_level == 1) {
-            // Admin vê todas as candidaturas, com os dados do usuário
+        if (Auth::user()->access_level == 1) {
             $applications = Application::with('scholarship', 'user')->get();
         } else {
-            // Estudante vê apenas as suas
             $applications = Application::with('scholarship')
-                            ->where('id_user', auth()->id())
-                            ->get();
+                ->where('id_user', Auth::id())
+                ->get();
         }
 
         return view('applications.index', compact('applications', 'scholarships'));
     }
-
 
     public function store(Request $request)
     {
         $request->validate([
             'id_scholarship' => 'required|exists:scholarships,id',
             'application_date' => 'required|date',
-
             'bilhete' => 'required|file|mimes:pdf,jpg,png|max:2048',
             'atestado_pobreza' => 'required|file|mimes:pdf,jpg,png|max:2048',
             'declaracao_bairro' => 'required|file|mimes:pdf,jpg,png|max:2048',
@@ -52,41 +48,39 @@ class ApplicationController extends Controller
         $user = Auth::user();
         $scholarship = Scholarship::findOrFail($request->id_scholarship);
 
-        if (strtolower(trim($scholarship->status)) === 'indisponivel') {
-            return back()->withErrors([
-                'id_scholarship' => 'Bolsa indisponível.'
-            ])->withInput();
+        if ($this->isScholarshipUnavailable($scholarship)) {
+            return back()->with('error', 'Esta bolsa está indisponível para candidatura.');
         }
 
-        // Salvar ficheiros
         $files = [];
+
         foreach ([
             'bilhete',
             'atestado_pobreza',
             'declaracao_bairro',
             'declaracao_agregado',
             'declaracao_rendimento',
-            'aproveitamento'
+            'aproveitamento',
         ] as $fileField) {
-
             if ($request->hasFile($fileField)) {
-                $files[$fileField . '_path'] =
-                    $request->file($fileField)->store('applications', 'public');
+                $files[$fileField . '_path'] = $request->file($fileField)->store('applications', 'public');
             }
         }
 
-        Application::create(array_merge([
+        $application = Application::create(array_merge([
             'id_user' => $user->id,
             'id_scholarship' => $request->id_scholarship,
             'application_date' => $request->application_date,
-
-            // CORRIGIDO: Removido espaço não-quebrável em snapshot_year
             'snapshot_course' => optional($user->course)->course_name,
-            'snapshot_year'   => $user->level,
+            'snapshot_year' => $user->level,
             'snapshot_period' => $user->period,
-
-            'status' => 'pending'
+            'status' => 'pending',
         ], $files));
+
+        $this->notificationService->notifyAdmins(
+            'Nova candidatura recebida',
+            "{$user->name} candidatou-se à bolsa \"{$scholarship->name}\" em {$application->application_date}."
+        );
 
         return back()->with('success', 'Candidatura submetida com sucesso!');
     }
@@ -101,25 +95,22 @@ class ApplicationController extends Controller
         $application = Application::findOrFail($id_application);
         $scholarship = Scholarship::findOrFail($request->id_scholarship);
 
-        if (strtolower(trim($scholarship->status)) === 'indisponivel') {
-            return back()->withErrors([
-                'id_scholarship' => 'Bolsa indisponível.'
-            ])->withInput();
+        if ($this->isScholarshipUnavailable($scholarship)) {
+            return back()->with('error', 'Esta bolsa está indisponível para candidatura.');
         }
 
         $files = [];
+
         foreach ([
             'bilhete',
             'atestado_pobreza',
             'declaracao_bairro',
             'declaracao_agregado',
             'declaracao_rendimento',
-            'aproveitamento'
+            'aproveitamento',
         ] as $fileField) {
-
             if ($request->hasFile($fileField)) {
-                $files[$fileField . '_path'] =
-                    $request->file($fileField)->store('applications', 'public');
+                $files[$fileField . '_path'] = $request->file($fileField)->store('applications', 'public');
             }
         }
 
@@ -131,65 +122,56 @@ class ApplicationController extends Controller
         return back()->with('success', 'Candidatura atualizada com sucesso!');
     }
 
-    /**
-     * NOVO MÉTODO: Atualiza apenas o status de uma candidatura (uso do Admin).
-     */
     public function changeStatus(Request $request, $id_application)
     {
-        // 1. Encontrar a candidatura
-        $application = Application::findOrFail($id_application);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        // 2. Checagem de Admin (baseado na sua lógica access_level = 1)
-        if (auth()->user()->access_level != 1) {
-            return back()->with('error', 'Acesso negado para alterar o status.');
+        if ($user->access_level != 1) {
+            return back()->with('error', 'Acesso negado.');
         }
 
-        // 3. Validação do Status
         $request->validate([
-            'status' => 'required|in:pending,approved,rejected', // Garante que é um dos 3 valores
+            'status' => 'required|in:pending,approved,rejected',
         ]);
 
-        // 4. Atualizar o status
+        $application = Application::with('scholarship')->findOrFail($id_application);
         $application->update([
             'status' => $request->status,
         ]);
-        
-        // Mensagem de sucesso para o Admin
-        $user_name = optional($application->user)->name ?? 'Usuário Desconhecido';
-        return back()->with('success', "Status da candidatura de **{$user_name}** atualizado para **" . ucfirst($application->status) . "**.");
+
+        $scholarshipName = optional($application->scholarship)->name ?? 'bolsa';
+
+        $this->notificationService->create(
+            $application->id_user,
+            'Resultado da candidatura',
+            "A sua candidatura para a bolsa \"{$scholarshipName}\" foi {$this->formatApplicationStatus($request->status)}."
+        );
+
+        return back()->with('success', 'Status atualizado com sucesso!');
     }
 
-//Permite que o Admin baixe um documento específico de uma candidatura.
-     //
     public function downloadDocument($id_application, $file_field)
     {
-        // 1. Verificar se é Admin
-        if (auth()->user()->access_level != 1) {
-            return back()->with('error', 'Acesso negado. Apenas administradores podem baixar documentos.');
+        if (Auth::user()->access_level != 1) {
+            return back()->with('error', 'Acesso negado.');
         }
 
-        // 2. Encontrar a candidatura
         $application = Application::findOrFail($id_application);
-
-        // Mapear o campo para o caminho real do arquivo no storage
         $pathField = $file_field . '_path';
 
-        // 3. Verificar se o campo existe no modelo e se tem um caminho
-        if (!array_key_exists($pathField, $application->getAttributes()) || !$application->{$pathField}) {
-            return back()->with('error', 'Documento não encontrado para esta candidatura.');
-        }
-        
-        $filePath = $application->{$pathField};
-
-        // 4. Verificar se o arquivo existe no disco (storage/app/public)
-        if (Storage::disk('public')->exists($filePath)) {
-            // Retorna o arquivo para download
-            return Storage::disk('public')->download($filePath);
+        if (! $application->{$pathField}) {
+            return back()->with('error', 'Documento não encontrado.');
         }
 
-        return back()->with('error', 'O arquivo não foi encontrado no servidor.');
+        $filePath = storage_path('app/public/' . $application->{$pathField});
+
+        if (file_exists($filePath)) {
+            return response()->download($filePath);
+        }
+
+        return back()->with('error', 'Arquivo não encontrado no servidor.');
     }
-
 
     public function destroy($id_application)
     {
@@ -197,5 +179,19 @@ class ApplicationController extends Controller
         $application->delete();
 
         return back()->with('success', 'Candidatura removida com sucesso!');
+    }
+
+    private function formatApplicationStatus(string $status): string
+    {
+        return match ($status) {
+            'approved' => 'aprovada',
+            'rejected' => 'rejeitada',
+            default => 'pendente',
+        };
+    }
+
+    private function isScholarshipUnavailable(Scholarship $scholarship): bool
+    {
+        return Str::lower(Str::ascii(trim((string) $scholarship->status))) === 'indisponivel';
     }
 }

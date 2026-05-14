@@ -4,7 +4,7 @@
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\StudentController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ScholarshipController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ResultController;
@@ -13,23 +13,34 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController;
+use Illuminate\Support\Facades\Auth;
 
-// Página inicial redireciona para login
+
 Route::middleware(['auth'])->group(function () {
 
- Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/index', [AdminDashboardController::class, 'index'])
-        ->name('admin.index');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // ADMIN
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin/index', [AdminDashboardController::class, 'index'])
+            ->name('admin.index');
+    });
+
+    // STUDENT
+    Route::middleware(['role:student'])->group(function () {
+        Route::get('/student/index', [StudentDashboardController::class, 'index'])
+            ->name('student.index');
+    });
+
+   
 });
 
-Route::middleware(['auth', 'role:student'])->group(function () {
-    Route::get('/student/index', [StudentDashboardController::class, 'index'])
-        ->name('student.index');
-});
-    
-// Autenticação
 
-// 1. ROTAS PÚBLICAS (Acessíveis sem login)
+//  login)
 Route::get('/', function () { return redirect()->route('login'); });
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.store');
@@ -90,6 +101,37 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     // RESULTADOS
     Route::resource('results', ResultController::class);
 
+    // NOTIFICAÇÕES
+    Route::middleware('auth')->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    });
+
+  
+     // MENSAGENS (CHAT)
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{user}', [MessageController::class, 'show'])->name('messages.chat');
+    Route::post('/messages/send', [MessageController::class, 'send'])->name('messages.send');
+    Route::put('/messages/update/{id}', [MessageController::class, 'update'])->name('messages.update');
+Route::delete('/messages/delete/{id}', [MessageController::class, 'destroy'])->name('messages.delete');
+
+//relatoris
+
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::post('/reports/filter', [ReportController::class, 'filter'])->name('reports.filter');
+Route::get('/reports/pdf', [ReportController::class, 'exportPDF'])->name('reports.pdf');
+
+
     // AJAX
     Route::get('/departments/{id}/faculty', [CourseController::class, 'getFacultyByDepartment']);
-}); // <<< Aqui fecha o group auth corretamente
+
+ 
+
+// Esqueci senha
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Reset senha
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+  
